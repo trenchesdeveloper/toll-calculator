@@ -8,9 +8,12 @@ import (
 	"github.com/trenchesdeveloper/toll-calculator/types"
 )
 
+var kafkaTopic = "obudata"
+
 type DataReceiver struct {
 	msgch chan types.OBUData
-	conn *websocket.Conn
+	conn  *websocket.Conn
+	prod  DataProducer
 }
 
 var upgrader = websocket.Upgrader{
@@ -40,20 +43,45 @@ func (dr *DataReceiver) wsReceiveLoop() {
 			log.Println(err)
 			continue
 		}
-		log.Printf("Received data from: %d\n", data.OBUID)
-		dr.msgch <- data
+
+		if err := dr.produceData(data); err != nil {
+			log.Println(err)
+			continue
+		}
 	}
 }
 
-func NewDataReceiver() *DataReceiver {
+func NewDataReceiver() (*DataReceiver, error) {
+	var( p DataProducer
+		err error
+		kafkaTopic = "obudata"
+	)
+
+	p, err = NewKafkaProducer(kafkaTopic)
+	if err != nil {
+		return nil, err
+	}
+
+	p = NewLogMiddleware(p)
+
 	return &DataReceiver{
 		msgch: make(chan types.OBUData, 128),
-	}
+		prod:  p,
+	}, nil
+}
+
+func (dr *DataReceiver) produceData(data types.OBUData) error {
+	return dr.prod.ProduceData(data)
 }
 
 func main() {
-	dr := NewDataReceiver()
-	http.HandleFunc("/ws", dr.echoHandler)
+	recv, err := NewDataReceiver()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.HandleFunc("/ws", recv.echoHandler)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
