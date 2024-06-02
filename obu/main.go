@@ -10,7 +10,7 @@ import (
 	"github.com/trenchesdeveloper/toll-calculator/types"
 )
 
-const sendInterval = time.Second
+const sendInterval = time.Second * 5
 
 const wsEndpont = "ws://localhost:8080/ws"
 

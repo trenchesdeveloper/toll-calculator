@@ -10,6 +10,9 @@ const kafkaTopic = "obudata"
 
 func main() {
 	srv := NewCalculatorService()
+
+	srv = NewLogMiddleware(srv)
+
 	KafkaConsumer, err := NewKafkaConsumer(kafkaTopic, srv)
 
 	if err != nil {

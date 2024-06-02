@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/sirupsen/logrus"
@@ -11,12 +10,12 @@ import (
 
 // This can also be called KafkaTransport
 type KafkaConsumer struct {
-	consumer  *kafka.Consumer
-	isRunning bool
-	calcService calculatorServicer
+	consumer    *kafka.Consumer
+	isRunning   bool
+	calcService CalculatorServicer
 }
 
-func NewKafkaConsumer(topic string, svc calculatorServicer) (*KafkaConsumer, error) {
+func NewKafkaConsumer(topic string, svc CalculatorServicer) (*KafkaConsumer, error) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": "localhost",
 		"group.id":          "myGroup",
@@ -30,7 +29,7 @@ func NewKafkaConsumer(topic string, svc calculatorServicer) (*KafkaConsumer, err
 	c.SubscribeTopics([]string{topic}, nil)
 
 	return &KafkaConsumer{
-		consumer: c,
+		consumer:    c,
 		calcService: svc,
 	}, nil
 
@@ -52,14 +51,14 @@ func (kc *KafkaConsumer) readMessageLoop() {
 			continue
 		}
 
-		distance,  err := kc.calcService.CalculateDistance(data)
+		distance, err := kc.calcService.CalculateDistance(data)
 
 		if err != nil {
 			logrus.Errorf("Error calculating distance: %s", err)
 			continue
 		}
 
-		fmt.Printf("Distance: %f\n", distance)
+		_ = distance
 	}
 }
 

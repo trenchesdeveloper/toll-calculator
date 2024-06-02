@@ -6,18 +6,16 @@ import (
 	"github.com/trenchesdeveloper/toll-calculator/types"
 )
 
-type calculatorServicer interface {
+type CalculatorServicer interface {
 	CalculateDistance(types.OBUData) (float64, error)
 }
 
 type CalculatorService struct {
-	points [][]float64
+	prevPoint []float64
 }
 
-func NewCalculatorService() *CalculatorService {
-	return &CalculatorService{
-		points: [][]float64{},
-	}
+func NewCalculatorService() CalculatorServicer {
+	return &CalculatorService{}
 }
 
 // pos1 x y
@@ -25,13 +23,11 @@ func NewCalculatorService() *CalculatorService {
 // pos3 x y
 
 func (s *CalculatorService) CalculateDistance(data types.OBUData) (float64, error) {
-	//distance := calculateDistance(data.Lat, data.Long, 0, 0)\
 	distance := 0.0
-	if len(s.points) > 0 {
-		prevPoint := s.points[len(s.points)-1] //last point
-		distance = calculateDistance(prevPoint[0], prevPoint[1], data.Lat, data.Long)
+	if len(s.prevPoint) > 0 {
+		distance = calculateDistance(s.prevPoint[0], s.prevPoint[1], data.Lat, data.Long)
 	}
-	s.points = append(s.points, []float64{data.Lat, data.Long})
+	s.prevPoint = []float64{data.Lat, data.Long}
 
 	return distance, nil
 }
