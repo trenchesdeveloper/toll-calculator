@@ -1,7 +1,21 @@
 package main
 
-import "fmt"
+import "log"
+
+// type DistanceCalculator struct{
+// 	consumer DataConsumer
+// }
+
+const kafkaTopic = "obudata"
 
 func main() {
-	fmt.Println("This is working")
+	srv := NewCalculatorService()
+	KafkaConsumer, err := NewKafkaConsumer(kafkaTopic, srv)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	KafkaConsumer.Start()
+
 }
