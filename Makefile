@@ -10,7 +10,12 @@ receiver:
 
 calculator:
 	@go build -o bin/calculator ./distance_calculator
-	@echo "Build receiver success"
+	@echo "Build calculator success"
 	@./bin/calculator
 
-.PHONY: obu receiver
+aggregator:
+	@go build -o bin/aggregator ./aggregator
+	@echo "Build aggregator success"
+	@./bin/aggregator
+
+.PHONY: obu receiver calculator aggregator
